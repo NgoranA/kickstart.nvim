@@ -13,7 +13,7 @@ return {
   dependencies = {
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
-
+    'theHamsta/nvim-dap-virtual-text',
     -- Required dependency for nvim-dap-ui
     'nvim-neotest/nvim-nio',
 
@@ -64,6 +64,8 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'codelldb',
+        'js-debug-adapter',
       },
     }
 
@@ -92,6 +94,86 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    -- cpp
+    dap.adapters.cpp = {
+      type = 'server',
+      port = '${port}',
+      executable = {
+        command = vim.fn.exepath 'codelldb',
+        args = { '--port', '${port}' },
+      },
+    }
+    dap.configurations.cpp = {
+      {
+        name = 'LLDB: Launch',
+        type = 'codelldb',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+        end,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = false,
+        args = {},
+        console = 'integratedTerminal',
+      },
+    }
+    -- rust
+    dap.configurations.rust = dap.configurations.cpp
+
+    -- c
+    dap.configurations.c = dap.configurations.cpp
+
+    -- js/ts
+    dap.adapters['pwa-node'] = {
+      type = 'server',
+      host = 'localhost',
+      port = '${port}',
+      executable = {
+        command = 'node',
+        -- 💀 Make sure to update this path to point to your installation
+        args = { vim.fn.stdpath 'data' .. '/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js', '${port}' },
+      },
+    }
+    dap.configurations.javascript = {
+      {
+        type = 'pwa-node',
+        request = 'launch',
+        name = 'Launch file',
+        program = '${file}',
+        cwd = '${workspaceFolder}',
+      },
+    }
+
+    dap.configurations.typescript = {
+      {
+        type = 'pwa-node',
+        request = 'launch',
+        name = 'Launch file',
+        program = '${file}',
+        cwd = '${workspaceFolder}',
+      },
+    }
+
+    --
+    -- dap.configurations.typescriptreact = dap.configurations.javascriptreact
+    -- virtual text
+    require('nvim-dap-virtual-text').setup {
+      -- This just tries to mitigate the chance that I leak tokens here. Probably won't stop it from happening...
+      display_callback = function(variable)
+        local name = string.lower(variable.name)
+        local value = string.lower(variable.value)
+        if name:match 'secret' or name:match 'api' or value:match 'secret' or value:match 'api' then
+          return '*****'
+        end
+
+        if #variable.value > 15 then
+          return ' ' .. string.sub(variable.value, 1, 15) .. '... '
+        end
+
+        return ' ' .. variable.value
+      end,
+    }
 
     -- Install golang specific config
     require('dap-go').setup {
