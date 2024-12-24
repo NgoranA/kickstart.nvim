@@ -175,7 +175,7 @@ vim.keymap.set('n', '<leader>vt', '<cmd>vnew<CR><cmd>terminal<CR>a', { desc = 'O
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
-vim.keymap.set('n', '<leader>n', '<cmd>Explore<CR>', { desc = 'Open Netr File Navigator' })
+vim.keymap.set('n', '<leader>n', '<cmd>Oil<CR>', { desc = 'Open Netr File Navigator' })
 
 vim.keymap.set('n', '<leader>e', vim.diagnostic.setloclist, { desc = 'Open diagnostic [C]urrent line' })
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -214,6 +214,16 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- autosave on leave insert mode
+-- vim.api.nvim_create_autocmd({ 'InsertLeave' }, {
+--   pattern = '*',
+--   callback = function()
+--     if vim.bo.modified then
+--       vim.cmd 'write'
+--     end
+--   end,
+-- })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
