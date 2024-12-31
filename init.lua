@@ -204,6 +204,10 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
+vim.keymap.set('n', '<space><space>x', '<cmd>source %<CR>', { desc = 'Source the entire file' })
+vim.keymap.set('n', '<space>x', ':.lua<CR>', { desc = 'Run the line on which the cursor is on' })
+vim.keymap.set('v', '<space>x', ':lua<CR>', { desc = 'Run a selected block of code' })
+
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.highlight.on_yank()`
@@ -635,6 +639,7 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        pylsp = {},
         clangd = {
           init_options = {
             fallbackFlags = {
